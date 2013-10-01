@@ -1,0 +1,4 @@
+composer.lock
+tests/phpunit.xml
+tests/TestConfiguration.php
+vendor

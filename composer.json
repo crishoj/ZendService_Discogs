@@ -1,0 +1,33 @@
+{
+    "name": "zendframework/zendservice-discogs",
+    "description": "Wrapper for the Discogs API (optionally with OAuth)",
+    "type": "library",
+    "keywords": [
+        "zf2",
+        "discogs"
+    ],
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Christian Rishøj",
+            "email": "christian@rishoj.net"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "ZendService\\Discogs\\": "library/"
+        }
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zend-http": ">=2.0.0",
+        "zendframework/zend-json": ">=2.0.0",
+        "zendframework/zend-stdlib": ">=2.0.0",
+        "zendframework/zend-uri": ">=2.0.0",
+        "zendframework/zendoauth": ">=2.0.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "zendframework/zend-config": ">=2.0.0"
+    }
+}
