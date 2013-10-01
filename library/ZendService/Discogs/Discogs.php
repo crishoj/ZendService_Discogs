@@ -136,7 +136,6 @@ class Discogs
      *
      * @param  string $path The path to append to the URI
      * @param  Http\Client $client
-     * @throws Client\Exception\UnexpectedValueException
      * @return void
      */
     protected function prepare($path, Http\Client $client)
@@ -202,6 +201,61 @@ class Discogs
         }
         $client->setMethod($method);
         return $client->send();
+    }
+
+    /**
+     * Attempts to retrieve a Request Token from an OAuth Provider which is
+     * later exchanged for an authorized Access Token used to access the
+     * protected resources exposed by a web service API.
+     *
+     * @param  null|array $customServiceParameters Non-OAuth Provider-specified parameters
+     * @param  null|string $httpMethod
+     * @param  null|OAuth\Http\RequestToken $request
+     * @return OAuth\Token\Request
+     */
+    public function getRequestToken(
+        array $customServiceParameters = null,
+        $httpMethod = null,
+        Http\RequestToken $request = null
+    ) {
+        if ($httpMethod === null)
+            // Default to GET (since Discogs complains over missing length in our POST requests)
+            $httpMethod = OAuth\OAuth::GET;
+        return $this->oauthConsumer->getRequestToken($customServiceParameters, $httpMethod, $request);
+    }
+
+    /**
+     * Method overloading
+     *
+     * @param  string $method
+     * @param  array $params
+     * @return mixed
+     * @throws Exception\BadMethodCallException if unable to find method
+     */
+    public function __call($method, $params)
+    {
+        if (method_exists($this->oauthConsumer, $method)) {
+            $return = call_user_func_array(array($this->oauthConsumer, $method), $params);
+            if ($return instanceof OAuth\Token\Access) {
+                $this->setHttpClient($return->getHttpClient($this->options));
+            }
+            return $return;
+        }
+        if (empty($this->methodType)) {
+            throw new Exception\BadMethodCallException(
+                'Invalid method "' . $method . '"'
+            );
+        }
+
+        $test = str_replace('_', '', strtolower($method));
+        $test = $this->methodType . $test;
+        if (!method_exists($this, $test)) {
+            throw new Exception\BadMethodCallException(
+                'Invalid method "' . $test . '"'
+            );
+        }
+
+        return call_user_func_array(array($this, $test), $params);
     }
 
 }

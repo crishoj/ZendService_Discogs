@@ -8,6 +8,9 @@ use ZendService\Discogs\Response as DiscogsResponse;
 
 class AuthenticatedTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Discogs\Discogs discogs
+     */
     protected $discogs;
 
     public function setUp()
