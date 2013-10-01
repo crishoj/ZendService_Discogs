@@ -37,6 +37,73 @@ In development - not production ready.
   - specify an OAuth access key/secret for a user
 - run `phpunit -c tests/phpunit.xml`
 
+## Usage
+```
+$this->discogs = new Discogs\Discogs();
+$label = $this->discogs->label(1);
+printf("Read more about label %s on these websites: %s\n", $label->name, implode(', ', $label->urls));
+```
+
 ## OAuth authentication
-- register your app on https://www.discogs.com/settings/developers and obtain OAuth consumer key/secret
-- ...
+Register your app on https://www.discogs.com/settings/developers and obtain OAuth consumer key/secret.
+
+Pass the credentials to the service constructor: 
+```
+$discogs = new Discogs\Discogs([
+    'oauthOptions' => [
+        'consumerKey' => [...],
+        'consumerSecret' => [...],
+        'callbackUrl'    => [...], 
+    ],
+]);
+```
+
+Obtain request token and keep it (serialize in session or otherwise):
+```
+$requestToken = $discogs->getRequestToken();
+```
+
+Redirect user to Discogs to authorize your app's access:
+```
+$url = $discogs->getRedirectUrl();
+// Redirect
+```
+
+When user returns to your callback URL, use the verifier from the request parameters and therequest token from before to obtain an access token:
+```
+$accessToken = $consumer->getAccessToken([
+    'oauth_token'    => $requestToken->getToken(),
+    'oauth_verifier' => $verifier,
+], $requestToken);
+```
+
+You can throw away the request token, but should keep the newly obtained access key/secret:
+```
+if ($accessToken->isValid()) {
+    printf("Authorized successfully\n");
+    printf("Access key: %s\n", $accessToken->getToken());
+    printf("Access secret: %s\n", $accessToken->getTokenSecret());
+} else {
+    printf("Something went wrong: %s\n", $accessToken->getResponse()->getReasonPhrase());
+}
+```
+
+While you have a valid access token, instantiate an authenticated client like this:
+```
+$discogs = new Discogs\Discogs([
+    'accessToken' => [
+        'token' => [...],
+        'secret' => [...],
+    ],
+    'oauthOptions' => [
+        'consumerKey' => [...],
+        'consumerSecret' => [...],
+    ],
+]);
+```
+
+Using the authenticated client, you can do e.g.:
+```
+$identity = $discogs->identity();
+printf("Hello, %s\n", $identity->username);
+```
