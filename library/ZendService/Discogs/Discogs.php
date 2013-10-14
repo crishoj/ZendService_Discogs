@@ -230,7 +230,7 @@ class Discogs
      * @param  string $method
      * @param  array $params
      * @return mixed
-     * @throws Exception\BadMethodCallException if unable to find method
+     * @throws Exception if unable to find method
      */
     public function __call($method, $params)
     {
@@ -241,19 +241,13 @@ class Discogs
             }
             return $return;
         }
-        if (empty($this->methodType)) {
-            throw new Exception\BadMethodCallException(
-                'Invalid method "' . $method . '"'
-            );
-        }
+        if (empty($this->methodType))
+            throw new \Exception('Invalid method "' . $method . '"');
 
         $test = str_replace('_', '', strtolower($method));
         $test = $this->methodType . $test;
-        if (!method_exists($this, $test)) {
-            throw new Exception\BadMethodCallException(
-                'Invalid method "' . $test . '"'
-            );
-        }
+        if (!method_exists($this, $test))
+            throw new \Exception('Invalid method "' . $test . '"');
 
         return call_user_func_array(array($this, $test), $params);
     }
