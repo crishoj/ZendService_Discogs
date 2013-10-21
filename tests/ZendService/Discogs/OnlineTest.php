@@ -96,11 +96,11 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testPostRelease() {
-        $release = $this->discogs->release('23');
+        $release = $this->discogs->release('40');
         $condition = Condition::CON_MINT;
         $sleeveCondition = Condition::CON_GOOD;
-        $price = 120; // IN DDK
-        $comments = null;
+        $price = (double)120; // IN DDK
+        $comments = "No Comments, except this";
         $allowOffers = false;
         $status = "For Sale";
 
@@ -120,9 +120,11 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
             'allow_offers' => $allowOffers,
             'status' => $status,
         ];
-        $response = $this->discogs->postRelease($postRelease);
+        $response = $this->discogs->postRelease(json_encode($postRelease));
 
-        var_dump($response->statusCode);
+
+        //var_dump($response->getRawResponse());
+
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getError());
 

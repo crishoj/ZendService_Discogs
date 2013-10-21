@@ -206,7 +206,8 @@ class Discogs
     {
 
         if (is_string($data)) {
-            $client->setRawData($data);
+            //$client->setRawData($data); // !FIXME No such function
+            $client->setRawBody($data);
         } elseif (is_array($data) || is_object($data)) {
             $client->setParameterPost((array) $data);
         }
