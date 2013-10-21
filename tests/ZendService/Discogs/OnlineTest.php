@@ -120,14 +120,10 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
             'allow_offers' => $allowOffers,
             'status' => $status,
         ];
-        $response = $this->discogs->postRelease(json_encode($postRelease));
-
-
+        $response = $this->discogs->postRelease($postRelease);
         //var_dump($response->getRawResponse());
-
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getError());
-
     }
 
     public function testSearchLabels()
