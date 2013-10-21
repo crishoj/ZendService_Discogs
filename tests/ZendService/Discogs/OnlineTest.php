@@ -4,7 +4,10 @@ namespace ZendTest\Discogs;
 
 use Zend\Http;
 use ZendService\Discogs;
-use ZendService\Discogs\results as Discogsresults;
+use ZendService\Discogs\Response as DiscogsResponse;
+require_once 'tests/TestConfiguration.php';
+require_once 'library/ZendService/Discogs/Release.php';
+require_once 'library/ZendService/Discogs/Condition.php';
 
 class OnlineTest extends \PHPUnit_Framework_TestCase
 {
@@ -83,6 +86,48 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('string', $result->uri);
     }
 
+    public function testRelease()
+    {
+        $id = '23';
+        $release = $this->discogs->release($id);
+        $this->assertTrue($release instanceof DiscogsResponse);
+        $this->assertTrue($release->isSuccess(), $release->getError());
+        $this->assertEquals($id, $release->resp->release->id);
+    }
+
+    public function testPostRelease() {
+        $release = $this->discogs->release('23');
+        $condition = Condition::CON_MINT;
+        $sleeveCondition = Condition::CON_GOOD;
+        $price = 120; // IN DDK
+        $comments = null;
+        $allowOffers = false;
+        $status = "For Sale";
+
+        $this->assertTrue($release instanceof DiscogsResponse);
+        $this->assertTrue($release->isSuccess(), $release->getError());
+        $this->assertInternalType('integer', $release->resp->release->id);
+        $this->assertInternalType('array', Condition::getConditions());
+        $this->assertInternalType('string', $condition);
+        $this->assertInternalType('string', $sleeveCondition);
+        //$postRelease = new Release($release->resp->release->id, $condition, $price, $sleeveCondition);
+        $postRelease = [
+            'release_id' => $release->resp->release->id,
+            'condition' => $condition,
+            'sleeve_condition' => $sleeveCondition,
+            'price' => $price,
+            'comments' => $comments,
+            'allow_offers' => $allowOffers,
+            'status' => $status,
+        ];
+        $response = $this->discogs->postRelease($postRelease);
+
+        var_dump($response->statusCode);
+        $this->assertTrue($response instanceof DiscogsResponse);
+        $this->assertTrue($response->isSuccess(), $response->getError());
+
+    }
+
     public function testSearchLabels()
     {
         $results = $this->discogs->searchLabels('Kompakt');
@@ -93,5 +138,7 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
             $this->assertInternalType('string', $result->title);
         }
     }
+
+
 
 }

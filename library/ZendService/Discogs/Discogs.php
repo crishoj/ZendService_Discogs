@@ -115,6 +115,16 @@ class Discogs
         return new Response($this->get('/labels/'.$id));
     }
 
+    public function release($id)
+    {
+        return new Response($this->get('/release/'.$id));
+    }
+
+    public function postRelease($data)
+    {
+        return new Response($this->post('/marketplace/listings/', $data));
+    }
+
     /**
      * @param $params - see http://www.discogs.com/developers/resources/database/search-endpoint.html
      * @return SearchResponse
@@ -194,6 +204,7 @@ class Discogs
      */
     protected function performPost($method, $data, Http\Client $client)
     {
+
         if (is_string($data)) {
             $client->setRawData($data);
         } elseif (is_array($data) || is_object($data)) {
@@ -220,9 +231,11 @@ class Discogs
     ) {
         if ($httpMethod === null)
             // Default to GET (since Discogs complains over missing length in our POST requests)
-            $httpMethod = OAuth\OAuth::GET;
+        $httpMethod = OAuth\OAuth::GET;
         return $this->oauthConsumer->getRequestToken($customServiceParameters, $httpMethod, $request);
     }
+
+
 
     /**
      * Method overloading
