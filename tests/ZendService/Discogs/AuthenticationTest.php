@@ -5,6 +5,7 @@ namespace ZendTest\Discogs;
 use Zend\Http;
 use ZendService\Discogs;
 use ZendService\Discogs\Response as DiscogsResponse;
+require_once 'tests/TestConfiguration.php';
 
 class AuthenticationTest extends \PHPUnit_Framework_TestCase
 {

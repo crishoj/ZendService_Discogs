@@ -97,31 +97,44 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
 
     public function testPostRelease() {
         $release = $this->discogs->release('40');
+        $this->assertTrue($release instanceof DiscogsResponse);
+        $this->assertTrue($release->isSuccess(), $release->getError());
+
         $condition = Condition::CON_MINT;
         $sleeveCondition = Condition::CON_GOOD;
         $price = (double)120; // IN DDK
-        $comments = "No Comments, except this";
+        /* $comments = "No Comments, except this";
         $allowOffers = false;
-        $status = "For Sale";
+        $status = "For Sale"; */
 
-        $this->assertTrue($release instanceof DiscogsResponse);
-        $this->assertTrue($release->isSuccess(), $release->getError());
         $this->assertInternalType('integer', $release->resp->release->id);
         $this->assertInternalType('array', Condition::getConditions());
         $this->assertInternalType('string', $condition);
         $this->assertInternalType('string', $sleeveCondition);
-        //$postRelease = new Release($release->resp->release->id, $condition, $price, $sleeveCondition);
+
+        $this->discogs = new Discogs\Discogs([
+            'accessToken' => [
+                'token' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_ACCESS_KEY,
+                'secret' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_ACCESS_SECRET,
+            ],
+            'oauthOptions' => [
+                'consumerKey' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_CONSUMER_KEY,
+                'consumerSecret' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_CONSUMER_SECRET,
+            ],
+        ]);
+
+        $this->assertTrue($this->discogs->isAuthorised());
+        $identity = $this->discogs->identity();
+        $this->assertTrue($identity->username == "imusic.dk");
+        $profile = $this->discogs->profile($identity->username);
+        $this->assertTrue($profile->isSuccess(), $profile->getError());
+
         $postRelease = [
             'release_id' => $release->resp->release->id,
             'condition' => $condition,
-            'sleeve_condition' => $sleeveCondition,
             'price' => $price,
-            'comments' => $comments,
-            'allow_offers' => $allowOffers,
-            'status' => $status,
         ];
         $response = $this->discogs->postRelease($postRelease);
-        //var_dump($response->getRawResponse());
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getError());
     }
