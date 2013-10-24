@@ -122,8 +122,6 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $this->assertTrue($this->discogs->isAuthorised());
-        $identity = $this->discogs->identity();
-        $this->assertTrue($identity->username == "imusic.dk");
         $profile = $this->discogs->profile($identity->username);
         $this->assertTrue($profile->isSuccess(), $profile->getError());
 
@@ -139,6 +137,25 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         $response = $this->discogs->postRelease($postRelease);
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getError());
+    }
+
+    public function testGetListings() {
+        $this->discogs = new Discogs\Discogs([
+            'accessToken' => [
+                'token' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_ACCESS_KEY,
+                'secret' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_ACCESS_SECRET,
+            ],
+            'oauthOptions' => [
+                'consumerKey' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_CONSUMER_KEY,
+                'consumerSecret' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_CONSUMER_SECRET,
+            ],
+        ]);
+
+        $identity = $this->discogs->identity();
+        $this->assertTrue($username = $identity->username == "imusic.dk");
+        $listings = $this->discogs->getListings($username);
+        var_dump($listings);
+
     }
 
     public function testSearchLabels()

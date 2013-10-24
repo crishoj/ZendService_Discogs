@@ -152,6 +152,11 @@ class Discogs
         return new Response($this->post('/marketplace/listings/', $data));
     }
 
+    public function getListings($username)
+    {
+        return new Response($this->get('/users/'.$username.'/inventory'));
+    }
+
     /**
      * @param $params - see http://www.discogs.com/developers/resources/database/search-endpoint.html
      * @return SearchResponse
