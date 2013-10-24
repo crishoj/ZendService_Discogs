@@ -149,7 +149,7 @@ class Discogs
 
     public function postRelease($data)
     {
-        return new Response($this->post('/marketplace/listings/', $data));
+        return new Response($this->post('/marketplace/listings', $data));
     }
 
     public function getListings($username)
