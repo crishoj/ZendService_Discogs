@@ -88,7 +88,7 @@ if ($accessToken->isValid()) {
 }
 ```
 
-While you have a valid access token, instantiate an authenticated client like this:
+While you have a valid access token, instantiate an authenticated eclient like this:
 ```
 $discogs = new Discogs\Discogs([
     'accessToken' => [

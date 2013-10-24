@@ -40,6 +40,49 @@ class AuthenticatedTest extends \PHPUnit_Framework_TestCase
         sleep(1);
     }
 
+    public function testPostRelease() {
+        $release = $this->discogs->release('40');
+        $this->assertTrue($release instanceof DiscogsResponse);
+        $this->assertTrue($release->isSuccess(), $release->getError());
+
+        $condition = CON_MINT;
+        $sleeveCondition = CON_GOOD;
+        $price = (double)120; // IN DDK
+        $comments = "No Comments, except this";
+        $allowOffers = false;
+        $status = "For Sale";
+
+        $this->assertInternalType('integer', $release->resp->release->id);
+        $this->assertInternalType('array', $this->discogs->getConditions());
+        $this->assertInternalType('string', $condition);
+        $this->assertInternalType('string', $sleeveCondition);
+
+        $this->assertTrue($this->discogs->isAuthorised());
+        $postRelease = [
+            'release_id' => $release->resp->release->id,
+            'condition' => $condition,
+            'sleeve_condition' => $sleeveCondition,
+            'price' => $price,
+            'comments' => $comments,
+            'allow_offers' => $allowOffers,
+            'status' => $status,
+        ];
+        $response = $this->discogs->postRelease($postRelease);
+        $this->assertTrue($response instanceof DiscogsResponse);
+        $this->assertTrue($response->isSuccess(), $response->getError());
+    }
+
+    public function testGetListings() {
+        $this->assertTrue($this->discogs->isAuthorised());
+        $identity = $this->discogs->identity();
+        $this->assertTrue($username = $identity->username == "imusic.dk");
+        $listings = $this->discogs->getListings($username);
+        //var_dump($listings);
+        $this->assertTrue($listings instanceof DiscogsResponse);
+        $this->assertTrue($listings->isSuccess(), $listings->getError());
+    }
+
+
     public function testAuthorisedWithToken()
     {
         $this->assertTrue($this->discogs->isAuthorised());
