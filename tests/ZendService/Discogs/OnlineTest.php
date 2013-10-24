@@ -120,11 +120,7 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
                 'consumerSecret' => TESTS_ZEND_SERVICE_DISCOGS_ONLINE_CONSUMER_SECRET,
             ],
         ]);
-
         $this->assertTrue($this->discogs->isAuthorised());
-        $profile = $this->discogs->profile($identity->username);
-        $this->assertTrue($profile->isSuccess(), $profile->getError());
-
         $postRelease = [
             'release_id' => $release->resp->release->id,
             'condition' => $condition,
@@ -154,8 +150,8 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         $identity = $this->discogs->identity();
         $this->assertTrue($username = $identity->username == "imusic.dk");
         $listings = $this->discogs->getListings($username);
-        var_dump($listings);
-
+        $this->assertTrue($listings instanceof DiscogsResponse);
+        $this->assertTrue($listings->isSuccess(), $listings->getError());
     }
 
     public function testSearchLabels()
