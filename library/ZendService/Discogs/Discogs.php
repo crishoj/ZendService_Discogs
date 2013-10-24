@@ -14,9 +14,36 @@ class Discogs
     const OAUTH_AUTHORIZE_URL     = 'http://www.discogs.com/oauth/authorize';
     const OAUTH_ACCESS_TOKEN_URL  = 'http://api.discogs.com/oauth/access_token';
 
+    //Condition
+    const CON_MINT              = "Mint (M)";
+    const CON_NEAR_MINT         = "Near Mint (NM or M-)";
+    const CON_VERY_GOOD_PLUS    = "Very Good Plus (VG+)";
+    const CON_VERY_GOOD         = "Very Good (VG)";
+    const CON_GOOD_PLUS         = "Good Plus (G+)";
+    const CON_GOOD              = "Good (G)";
+    const CON_FAIR              = "Fair (F)";
+    const CON_POOR              = "Poor (P)";
+    //Sleeve Condition Only (plus the above)
+    const CON_GENERIC           = "Generic";
+    const CON_NOT_GRADED        = "Not Graded";
+    const CON_NO_COVER          = "No Cover";
+    //Release
+    const STATUS_DRAFT = "Draft";
+    const STATUS_SALE = "For Sale";
+
     protected $httpClient = null;
     protected $oauthConsumer = null;
     protected $options = array();
+
+    public static function getConditions() {
+        return ([
+            CON_MINT, CON_NEAR_MINT, CON_VERY_GOOD_PLUS, CON_VERY_GOOD, CON_GOOD_PLUS, CON_GOOD, CON_FAIR, CON_POOR
+        ]);
+    }
+
+    public static function getSleeveConditions() {
+        return merge_array(self::getConditions(), [CON_GENERIC, CON_NOT_GRADED, CON_NO_COVER]);
+    }
 
     public function __construct($options = null, OAuth\Consumer $consumer = null, Http\Client $httpClient = null)
     {
