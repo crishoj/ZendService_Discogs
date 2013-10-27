@@ -14,36 +14,9 @@ class Discogs
     const OAUTH_AUTHORIZE_URL     = 'http://www.discogs.com/oauth/authorize';
     const OAUTH_ACCESS_TOKEN_URL  = 'http://api.discogs.com/oauth/access_token';
 
-    //Condition
-    const CON_MINT              = "Mint (M)";
-    const CON_NEAR_MINT         = "Near Mint (NM or M-)";
-    const CON_VERY_GOOD_PLUS    = "Very Good Plus (VG+)";
-    const CON_VERY_GOOD         = "Very Good (VG)";
-    const CON_GOOD_PLUS         = "Good Plus (G+)";
-    const CON_GOOD              = "Good (G)";
-    const CON_FAIR              = "Fair (F)";
-    const CON_POOR              = "Poor (P)";
-    //Sleeve Condition Only (plus the above)
-    const CON_GENERIC           = "Generic";
-    const CON_NOT_GRADED        = "Not Graded";
-    const CON_NO_COVER          = "No Cover";
-    //Release
-    const STATUS_DRAFT = "Draft";
-    const STATUS_SALE = "For Sale";
-
     protected $httpClient = null;
     protected $oauthConsumer = null;
     protected $options = array();
-
-    public static function getConditions() {
-        return ([
-            CON_MINT, CON_NEAR_MINT, CON_VERY_GOOD_PLUS, CON_VERY_GOOD, CON_GOOD_PLUS, CON_GOOD, CON_FAIR, CON_POOR
-        ]);
-    }
-
-    public static function getSleeveConditions() {
-        return merge_array(self::getConditions(), [CON_GENERIC, CON_NOT_GRADED, CON_NO_COVER]);
-    }
 
     public function __construct($options = null, OAuth\Consumer $consumer = null, Http\Client $httpClient = null)
     {
@@ -147,14 +120,34 @@ class Discogs
         return new Response($this->get('/release/'.$id));
     }
 
-    public function postRelease($data)
+    public function createRelease($data)
     {
         return new Response($this->post('/marketplace/listings', $data));
+    }
+
+    public function updateRelease($listingId, $data) {
+        return new Response($this->post('/marketplace/listings/'.$listingId, $data));
+    }
+
+    public function deleteRelease($listingId) {
+        return new Response($this->delete('/marketplace/listings/'.$listingId));
     }
 
     public function getListings($username)
     {
         return new Response($this->get('/users/'.$username.'/inventory'));
+    }
+
+    public function getListingIdsAndNames($username)
+    {
+        $listings = new Response($this->get('/users/'.$username.'/inventory'));
+        foreach($listings as $listing) {
+            $listings[] = [
+                'id' => $listing->id,
+                'description' => $listings->release->description,
+            ];
+        }
+        return $listings;
     }
 
     /**
@@ -236,14 +229,19 @@ class Discogs
      */
     protected function performPost($method, $data, Http\Client $client)
     {
-
-        if (is_string($data)) {
-            //$client->setRawData($data); // !FIXME No such function
-            $client->setRawBody($data);
-        } elseif (is_array($data) || is_object($data)) {
-            $client->setParameterPost((array) $data);
-        }
+        if (is_array($data) || is_object($data))
+            $data = json_encode($data);
         $client->setMethod($method);
+        $client->setHeaders(Http\Headers::fromString('Content-Type: application/json'));
+        $client->setRawBody($data);
+        return $client->send();
+    }
+
+    protected function delete($path) {
+        $client = $this->getHttpClient();
+        $this->prepare($path, $client);
+        $client->setMethod(Http\Request::METHOD_DELETE);
+        $client->setHeaders(Http\Headers::fromString('Content-Type: application/json'));
         return $client->send();
     }
 
@@ -267,8 +265,6 @@ class Discogs
         $httpMethod = OAuth\OAuth::GET;
         return $this->oauthConsumer->getRequestToken($customServiceParameters, $httpMethod, $request);
     }
-
-
 
     /**
      * Method overloading

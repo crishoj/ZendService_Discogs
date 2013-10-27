@@ -24,7 +24,7 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         $this->discogs->getHttpClient()->setAdapter($this->httpClientAdapterSocket);
 
         // Respect rate limit
-        sleep(1);
+        sleep(2);
     }
 
     public function testNotAuthorisedWithoutToken()
@@ -103,7 +103,4 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
             $this->assertInternalType('string', $result->title);
         }
     }
-
-
-
 }
