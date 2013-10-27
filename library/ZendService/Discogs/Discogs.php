@@ -141,13 +141,13 @@ class Discogs
     public function getListingIdsAndNames($username)
     {
         $listings = new Response($this->get('/users/'.$username.'/inventory'));
-        foreach($listings as $listing) {
-            $listings[] = [
+        foreach($listings->listings as $listing) {
+            $listingsArr[] = [
                 'id' => $listing->id,
-                'description' => $listings->release->description,
+                'description' => $listing->release->description,
             ];
         }
-        return $listings;
+        return $listingsArr;
     }
 
     /**

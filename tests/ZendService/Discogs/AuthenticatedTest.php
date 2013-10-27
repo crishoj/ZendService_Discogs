@@ -97,7 +97,10 @@ class AuthenticatedTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testUpdateRelease() {
-        $response = $this->discogs->updateRelease(124993585, [
+        $identity = $this->discogs->identity();
+        $listings = $this->discogs->getListingIdsAndNames($identity->username);
+        $this->assertInternalType('integer', $listings[0]['id']);
+        $response = $this->discogs->updateRelease($listings[0]['id'], [
             'release_id' => 1024123,
             'condition' => 'Fair (F)',
             'price' => (float)40.0,
@@ -107,7 +110,10 @@ class AuthenticatedTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testDeleteRelease() {
-        $response = $this->discogs->deleteRelease(125354107);
+        $identity = $this->discogs->identity();
+        $listings = $this->discogs->getListingIdsAndNames($identity->username);
+        $this->assertInternalType('integer', $listings[0]['id']);
+        $response = $this->discogs->deleteRelease($listings[0]['id']);
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getRawResponse());
     }
