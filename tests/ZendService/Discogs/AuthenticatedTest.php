@@ -63,57 +63,43 @@ class AuthenticatedTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($identity->resource_url, $profile->resource_url);
     }
 
-    public function testGetListings() {
+    public function testGetInventoryIdsAndNames() {
         $identity = $this->discogs->identity();
-        $this->assertTrue($identity instanceof DiscogsResponse);
-        $this->assertTrue($identity->isSuccess(), $identity->getRawResponse());
-        $listings = $this->discogs->getListings($identity->username);
+        $listings = $this->discogs->getInventory($identity->username);
         $this->assertTrue($listings instanceof DiscogsResponse);
         $this->assertTrue($listings->isSuccess(), $listings->getRawResponse());
-    }
-
-    public function testGetListingIdsAndNames() {
-        $identity = $this->discogs->identity();
-        $this->assertTrue($identity instanceof DiscogsResponse);
-        $this->assertTrue($identity->isSuccess(), $identity->getRawResponse());
-        $listings = $this->discogs->getListings($identity->username);
-        $this->assertTrue($listings instanceof DiscogsResponse);
-        $this->assertTrue($listings->isSuccess(), $listings->getRawResponse());
-        foreach($listings->listings as $listings) {
-            $this->assertInternalType('integer', $listings->id);
-            $this->assertInternalType('string', $listings->release->description);
-            $this->assertEquals($listings->seller->username, $identity->username);
+        foreach($listings->listings as $listing) {
+            $this->assertInternalType('integer', $listing->id);
+            $this->assertInternalType('string', $listing->release->description);
+            $this->assertEquals($listing->seller->username, $identity->username);
         }
     }
 
-    public function testPostRelease() {
-        $response = $this->discogs->createRelease([
+    public function testListingCRUD() {
+        //Create Listing
+        $response = $this->discogs->createListing([
             'release_id' => 1024123,
             'condition' => 'Mint (M)',
-            'price' => (float)80.0,
+            'price' => 80.0,
         ]);
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getRawResponse());
-    }
 
-    public function testUpdateRelease() {
+        //Update Listing
         $identity = $this->discogs->identity();
-        $listings = $this->discogs->getListingIdsAndNames($identity->username);
+        $listings = $this->discogs->getInventoryIdsAndNames($identity->username);
         $this->assertInternalType('integer', $listings[0]['id']);
-        $response = $this->discogs->updateRelease($listings[0]['id'], [
+        $this->assertInternalType('string', $listings[0]['description']);
+        $response = $this->discogs->updateListing($listings[0]['id'], [
             'release_id' => 1024123,
             'condition' => 'Fair (F)',
             'price' => (float)40.0,
         ]);
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getRawResponse());
-    }
 
-    public function testDeleteRelease() {
-        $identity = $this->discogs->identity();
-        $listings = $this->discogs->getListingIdsAndNames($identity->username);
-        $this->assertInternalType('integer', $listings[0]['id']);
-        $response = $this->discogs->deleteRelease($listings[0]['id']);
+        //Delete Listing
+        $response = $this->discogs->deleteListing($listings[0]['id']);
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getRawResponse());
     }

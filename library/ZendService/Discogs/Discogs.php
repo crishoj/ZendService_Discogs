@@ -120,25 +120,25 @@ class Discogs
         return new Response($this->get('/release/'.$id));
     }
 
-    public function createRelease($data)
+    public function createListing($data)
     {
         return new Response($this->post('/marketplace/listings', $data));
     }
 
-    public function updateRelease($listingId, $data) {
+    public function updateListing($listingId, $data) {
         return new Response($this->post('/marketplace/listings/'.$listingId, $data));
     }
 
-    public function deleteRelease($listingId) {
+    public function deleteListing($listingId) {
         return new Response($this->delete('/marketplace/listings/'.$listingId));
     }
 
-    public function getListings($username)
+    public function getInventory($username)
     {
         return new Response($this->get('/users/'.$username.'/inventory'));
     }
 
-    public function getListingIdsAndNames($username)
+    public function getInventoryIdsAndNames($username)
     {
         $listings = new Response($this->get('/users/'.$username.'/inventory'));
         foreach($listings->listings as $listing) {
