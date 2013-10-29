@@ -63,44 +63,47 @@ class AuthenticatedTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($identity->resource_url, $profile->resource_url);
     }
 
-    public function testGetInventoryIdsAndNames() {
+    public function testGetInventory() {
         $identity = $this->discogs->identity();
         $listings = $this->discogs->getInventory($identity->username);
         $this->assertTrue($listings instanceof DiscogsResponse);
         $this->assertTrue($listings->isSuccess(), $listings->getRawResponse());
-        foreach($listings->listings as $listing) {
-            $this->assertInternalType('integer', $listing->id);
-            $this->assertInternalType('string', $listing->release->description);
-            $this->assertEquals($listing->seller->username, $identity->username);
-        }
     }
 
     public function testListingCRUD() {
         //Create Listing
         $response = $this->discogs->createListing([
             'release_id' => 1024123,
-            'condition' => 'Mint (M)',
-            'price' => 80.0,
+            'condition' => 'Good Plus (G+)',
+            'price' => 180.0,
         ]);
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getRawResponse());
 
         //Update Listing
         $identity = $this->discogs->identity();
-        $listings = $this->discogs->getInventoryIdsAndNames($identity->username);
-        $this->assertInternalType('integer', $listings[0]['id']);
-        $this->assertInternalType('string', $listings[0]['description']);
-        $response = $this->discogs->updateListing($listings[0]['id'], [
-            'release_id' => 1024123,
+        $inventory = $this->discogs->getInventory($identity->username);
+        $listing = end($inventory->listings);
+        $this->assertInternalType('integer', $listing->id);
+        $this->assertEquals($listing->seller->username, $identity->username);
+        $response = $this->discogs->updateListing($listing->id, [
             'condition' => 'Fair (F)',
-            'price' => (float)40.0,
+            'price' => 40.0,
         ]);
+        $inventory = $this->discogs->getInventory($identity->username);
+        $listing = end($inventory->listings);
+        $this->assertEquals($listing->condition, 'Fair (F)');
+        $this->assertEquals($listing->price->value, 40.0);
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getRawResponse());
 
         //Delete Listing
-        $response = $this->discogs->deleteListing($listings[0]['id']);
+        $response = $this->discogs->deleteListing($listing->id);
         $this->assertTrue($response instanceof DiscogsResponse);
         $this->assertTrue($response->isSuccess(), $response->getRawResponse());
+        $inventory = $this->discogs->getInventory($identity->username);
+        $latestListing = end($inventory->listings);
+        $this->assertNotEquals($listing->id, $latestListing);
+
     }
 }

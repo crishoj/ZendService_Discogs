@@ -140,14 +140,11 @@ class Discogs
 
     public function getInventoryIdsAndNames($username)
     {
-        $listings = new Response($this->get('/users/'.$username.'/inventory'));
-        foreach($listings->listings as $listing) {
-            $listingsArr[] = [
-                'id' => $listing->id,
-                'description' => $listing->release->description,
-            ];
+        $response = new Response($this->get('/users/'.$username.'/inventory'));
+        foreach($response->jsonBody as $listing) {
+            $listings[] = $listing;
         }
-        return $listingsArr;
+        return $listings;
     }
 
     /**
