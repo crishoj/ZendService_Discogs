@@ -138,15 +138,6 @@ class Discogs
         return new Response($this->get('/users/'.$username.'/inventory'));
     }
 
-    public function getInventoryIdsAndNames($username)
-    {
-        $response = new Response($this->get('/users/'.$username.'/inventory'));
-        foreach($response->jsonBody as $listing) {
-            $listings[] = $listing;
-        }
-        return $listings;
-    }
-
     /**
      * @param $params - see http://www.discogs.com/developers/resources/database/search-endpoint.html
      * @return SearchResponse
@@ -155,6 +146,68 @@ class Discogs
     {
         $params['q'] = $query;
         return new SearchResponse($this->get('/database/search', $params));
+    }
+
+    function searchRelease($label = null, $catno = null, $params = [])
+    {
+        $params['type'] = 'release';
+        $params['label'] = $label;
+        $params['catno'] = $catno;
+        return new SearchResponse($this->get('/database/search', $params));
+    }
+
+    public function searchReleaseWithBarcode($query, $params = [])
+    {
+        $params['type'] = 'release';
+        $params['barcode'] = $query;
+        return new SearchResponse($this->get('/database/search', $params));
+    }
+
+    public function formatBarcodeAsUPC($barcode) {
+        if(strlen($barcode) == 13) {
+            if(substr($barcode, 0, 1) == "0")
+                $barcode = substr($barcode, 1);
+        }
+        $barcode = preg_replace('/^.{1}/', "$0 ", $barcode);
+        $barcode = preg_replace('/^.{12}/', "$0 ", $barcode);
+        return $barcode;
+    }
+
+    public function formatBarcodeZeropad($string) {
+        return sprintf("%013d", (string)$string);
+    }
+
+    //Keeps: spaces, ">" and "-" as they might be used in the barcode string
+    public function stripNonAlphanumerics($string) {
+        return preg_replace('/[^0-9>\- ]/i', '', (string)$string);
+
+    }
+
+    public function formatBarcodeAddSpace($barcode) {
+        $barcode = self::formatBarcodeRemoveSpaces($barcode);
+        $barcode = preg_replace('/^.{1}/', "$0 ", $barcode);
+        $barcode = preg_replace('/^.{8}/', "$0 ", $barcode);
+        return $barcode;
+    }
+
+    public function formatBarcodeAddSpace2($barcode) {
+        $barcode = self::formatBarcodeRemoveSpaces($barcode);
+        if (strlen($barcode) == 13) {
+            $barcode = preg_replace('/^.{1}/', "$0 ", $barcode);
+            $barcode = preg_replace('/^.{13}/', "$0 ", $barcode);
+        }
+        return $barcode;
+    }
+
+    public function formatBarcodeAddDashes($barcode) {
+        $barcode = self::formatBarcodeRemoveSpaces($barcode);
+        $barcode = preg_replace('/^.{1}/',"-", $barcode);
+        $barcode = preg_replace('/^.{8}/', "-", $barcode);
+        return $barcode;
+    }
+
+    public function formatBarcodeRemoveSpaces($string) {
+        return str_replace(' ','', (string)$string);
     }
 
     public function searchLabels($query, $params = [])
