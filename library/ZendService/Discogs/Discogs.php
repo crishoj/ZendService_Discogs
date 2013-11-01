@@ -121,7 +121,8 @@ class Discogs
      */
     public function search($query, $params = [])
     {
-        $params['q'] = $query;
+        if ($query)
+            $params['q'] = $query;
         return new SearchResponse($this->get('/database/search', $params));
     }
 

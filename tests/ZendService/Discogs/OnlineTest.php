@@ -42,6 +42,7 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
     public function testSearch()
     {
         $result = $this->discogs->search('Planet E');
+        $this->assertInstanceOf('Response', $result);
         $this->assertTrue($result->isSuccess(), $result->getError());
         $this->assertInternalType('array', $result->results);
     }
@@ -81,6 +82,17 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty($result);
         $this->assertInternalType('string', $result->type);
         $this->assertInternalType('string', $result->uri);
+    }
+
+    public function testParameterSearch()
+    {
+        $barcode = '4 526180 117285';
+        $result = $this->discogs->search('', ['barcode' => $barcode]);
+        $this->assertTrue($result->isSuccess(), $result->getError());
+
+        $this->assertGreaterThanOrEqual(1, $result->items);
+        $this->assertContains($barcode, $result[0]->barcode); // FIXME: should compare normalized barcodes
+        $this->assertContains('Black Jazz Records', $result[0]->label);
     }
 
     public function testSearchLabels()
