@@ -148,6 +148,13 @@ class Discogs
         return new SearchResponse($this->get('/database/search', $params));
     }
 
+    public function searchRelease($query, $params = [])
+    {
+        $params['type'] = 'release';
+        $params['q'] = $query;
+        return new SearchResponse($this->get('/database/search', $params));
+    }
+
     public function searchLabels($query, $params = [])
     {
         $params['type'] = 'label';
