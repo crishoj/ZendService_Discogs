@@ -133,9 +133,16 @@ class Discogs
         return new Response($this->delete('/marketplace/listings/'.$listingId));
     }
 
-    public function getInventory($username)
+    /**
+     * @param string $username - When authenticated: $identity->username
+     * @param string $status - Must be 'For Sale' / 'Draft'
+     * @return Response
+     */
+    public function getInventory($username, $status = null)
     {
-        return new Response($this->get('/users/'.$username.'/inventory'));
+        if ($status && in_array($status, ['For Sale', 'Draft']))
+            $data['status'] = $status;
+        return new Response($this->get('/users/'.$username.'/inventory', $status));
     }
 
     /**
