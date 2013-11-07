@@ -142,7 +142,7 @@ class Discogs
     {
         if ($status && in_array($status, ['For Sale', 'Draft']))
             $data['status'] = $status;
-        return new Response($this->get('/users/'.$username.'/inventory', $status));
+        return new Response($this->get('/users/'.$username.'/inventory', $data));
     }
 
     /**
