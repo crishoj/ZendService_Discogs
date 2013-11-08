@@ -107,7 +107,7 @@ class Discogs
 
     public function profile($username)
     {
-        return new Response($this->get('/users/'.$username));
+        return new Response($this->get('/users/'.urlencode($username)));
     }
 
     public function label($id)
@@ -135,14 +135,12 @@ class Discogs
 
     /**
      * @param string $username - When authenticated: $identity->username
-     * @param string $status - Must be 'For Sale' / 'Draft'
+     * @param array $param['status'] - Must be 'For Sale' / 'Draft'
      * @return Response
      */
-    public function getInventory($username, $status = null)
+    public function inventory($username, $params = [])
     {
-        if ($status && in_array($status, ['For Sale', 'Draft']))
-            $data['status'] = $status;
-        return new Response($this->get('/users/'.$username.'/inventory', $data));
+        return new Response($this->get('/users/'.urlencode($username).'/inventory', $params));
     }
 
     /**
