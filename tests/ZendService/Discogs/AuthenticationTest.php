@@ -6,6 +6,7 @@ use Zend\Http;
 use ZendService\Discogs;
 use ZendService\Discogs\Response as DiscogsResponse;
 
+
 class AuthenticationTest extends \PHPUnit_Framework_TestCase
 {
     /**

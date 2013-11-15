@@ -69,7 +69,8 @@ $url = $discogs->getRedirectUrl();
 // Redirect
 ```
 
-When user returns to your callback URL, use the verifier from the request parameters and therequest token from before to obtain an access token:
+When user returns to your callback URL, use the verifier from the request parameters and the
+request token from before to obtain an access token:
 ```
 $accessToken = $consumer->getAccessToken([
     'oauth_token'    => $requestToken->getToken(),

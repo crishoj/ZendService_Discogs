@@ -16,10 +16,10 @@ class SearchResponse extends Response implements \ArrayAccess, \IteratorAggregat
     {
         if (null === $this->jsonBody)
             return null;
-        if (!isset($this->jsonBody->{$name}))
-            if (isset($this->jsonBody->pagination) && isset($this->jsonBody->pagination->{$name}))
-                return $this->jsonBody->pagination->{$name};
-        return $this->jsonBody->{$name};
+        if (isset($this->jsonBody->{$name}))
+            return $this->jsonBody->{$name};
+        if (isset($this->jsonBody->pagination) && isset($this->jsonBody->pagination->{$name}))
+            return $this->jsonBody->pagination->{$name};
     }
 
     /**

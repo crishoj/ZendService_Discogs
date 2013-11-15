@@ -4,7 +4,6 @@ namespace ZendTest\Discogs;
 
 use Zend\Http;
 use ZendService\Discogs;
-use ZendService\Discogs\results as Discogsresults;
 
 class OnlineTest extends \PHPUnit_Framework_TestCase
 {
@@ -21,7 +20,10 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         $this->discogs = new Discogs\Discogs();
         $this->httpClientAdapterSocket = new \Zend\Http\Client\Adapter\Socket();
         $this->discogs->getHttpClient()->setAdapter($this->httpClientAdapterSocket);
+    }
 
+    protected function tearDown()
+    {
         // Respect rate limit
         sleep(1);
     }
@@ -33,8 +35,11 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
 
     public function testLabel()
     {
-        $label = $this->discogs->label(1);
+        $id = 1;
+        $label = $this->discogs->label($id);
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $label);
         $this->assertTrue($label->isSuccess(), $label->getError());
+        $this->assertEquals($id, $label->id);
         $this->assertInternalType('string', $label->name);
         $this->assertInternalType('array', $label->urls);
     }
@@ -42,7 +47,7 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
     public function testSearch()
     {
         $result = $this->discogs->search('Planet E');
-        $this->assertInstanceOf('Response', $result);
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $result);
         $this->assertTrue($result->isSuccess(), $result->getError());
         $this->assertInternalType('array', $result->results);
     }
@@ -62,7 +67,7 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($results->items, $results->pagination->items);
     }
 
-    public function testSearchresultsIteration()
+    public function testSearchResultsIteration()
     {
         $results = $this->discogs->search('Kompakt');
         $this->assertTrue($results->isSuccess(), $results->getError());
@@ -72,7 +77,7 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    public function testSearchresultsArrayAccess()
+    public function testSearchResultsArrayAccess()
     {
         $results = $this->discogs->search('Kompakt');
         $this->assertTrue($results->isSuccess(), $results->getError());
@@ -95,15 +100,13 @@ class OnlineTest extends \PHPUnit_Framework_TestCase
         $this->assertContains('Black Jazz Records', $result[0]->label);
     }
 
-    public function testSearchLabels()
+    public function testRelease()
     {
-        $results = $this->discogs->searchLabels('Kompakt');
-        $this->assertTrue($results->isSuccess(), $results->getError());
-        $this->assertGreaterThan(0, $results->items);
-        foreach ($results as $result) {
-            $this->assertEquals('label', $result->type);
-            $this->assertInternalType('string', $result->title);
-        }
+        $id = 23;
+        $release = $this->discogs->release($id);
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $release);
+        $this->assertTrue($release->isSuccess(), $release->getError());
+        $this->assertEquals($id, $release->id);
     }
 
 }

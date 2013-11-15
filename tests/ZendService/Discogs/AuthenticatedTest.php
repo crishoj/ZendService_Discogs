@@ -4,7 +4,6 @@ namespace ZendTest\Discogs;
 
 use Zend\Http;
 use ZendService\Discogs;
-use ZendService\Discogs\Response as DiscogsResponse;
 
 class AuthenticatedTest extends \PHPUnit_Framework_TestCase
 {
@@ -49,6 +48,7 @@ class AuthenticatedTest extends \PHPUnit_Framework_TestCase
     {
         $identity = $this->discogs->identity();
         $this->assertTrue($identity->isSuccess(), $identity->getError());
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $identity);
         $this->assertInternalType('string', $identity->username);
         $this->assertStringEndsWith($identity->username, $identity->resource_url);
     }
@@ -57,10 +57,59 @@ class AuthenticatedTest extends \PHPUnit_Framework_TestCase
     {
         $identity = $this->discogs->identity();
         $profile = $this->discogs->profile($identity->username);
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $profile);
         $this->assertTrue($profile->isSuccess(), $profile->getError());
         $this->assertEquals($identity->id, $profile->id);
         $this->assertEquals($identity->username, $profile->username);
         $this->assertEquals($identity->resource_url, $profile->resource_url);
     }
 
+    public function testInventory() {
+        $identity = $this->discogs->identity();
+        $inventory = $this->discogs->inventory($identity->username);
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $inventory);
+        $this->assertTrue($inventory->isSuccess(), $inventory->getRawResponse());
+    }
+
+    public function testListingCRUD() {
+        $identity = $this->discogs->identity();
+
+        // Create Listing
+        $response = $this->discogs->createListing([
+            'release_id' => 1024123,
+            'condition' => 'Good Plus (G+)',
+            'price' => 180.0,
+        ]);
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $response);
+        $this->assertTrue($response->isSuccess(), $response->getRawResponse());
+
+        // Update Listing
+        $inventory = $this->discogs->inventory($identity->username);
+        $numListings = count($inventory->listings);
+        $this->assertGreaterThanOrEqual(1, $numListings);
+        $listing = $inventory->listings[$numListings-1];
+        $this->assertInternalType('integer', $listing->id);
+        $this->assertEquals($listing->seller->username, $identity->username);
+        $response = $this->discogs->updateListing($listing->id, [
+            'condition' => 'Fair (F)',
+            'price' => 40.0,
+        ]);
+
+        // Read Listing
+        $inventory = $this->discogs->inventory($identity->username);
+        $numListings = count($inventory->listings);
+        $this->assertGreaterThanOrEqual(1, $numListings);
+        $listing = $inventory->listings[$numListings-1];
+        $this->assertEquals($listing->condition, 'Fair (F)');
+        $this->assertEquals($listing->price->value, 40.0);
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $response);
+        $this->assertTrue($response->isSuccess(), $response->getRawResponse());
+
+        // Delete Listing
+        $response = $this->discogs->deleteListing($listing->id);
+        $this->assertInstanceOf('ZendService\\Discogs\\Response', $response);
+        $this->assertTrue($response->isSuccess(), $response->getRawResponse());
+        $inventory = $this->discogs->inventory($identity->username);
+        $this->assertLessThan($numListings, count($inventory->listings));
+    }
 }

@@ -107,12 +107,40 @@ class Discogs
 
     public function profile($username)
     {
-        return new Response($this->get('/users/'.$username));
+        return new Response($this->get('/users/'.urlencode($username)));
     }
 
     public function label($id)
     {
         return new Response($this->get('/labels/'.$id));
+    }
+
+    public function release($id)
+    {
+        return new Response($this->get('/releases/'.$id));
+    }
+
+    public function createListing($data)
+    {
+        return new Response($this->post('/marketplace/listings', $data));
+    }
+
+    public function updateListing($listingId, $data) {
+        return new Response($this->post('/marketplace/listings/'.$listingId, $data));
+    }
+
+    public function deleteListing($listingId) {
+        return new Response($this->delete('/marketplace/listings/'.$listingId));
+    }
+
+    /**
+     * @param string $username - When authenticated: $identity->username
+     * @param array $param['status'] - Must be 'For Sale' / 'Draft'
+     * @return Response
+     */
+    public function inventory($username, $params = [])
+    {
+        return new Response($this->get('/users/'.urlencode($username).'/inventory', $params));
     }
 
     /**
@@ -124,12 +152,6 @@ class Discogs
         if ($query)
             $params['q'] = $query;
         return new SearchResponse($this->get('/database/search', $params));
-    }
-
-    public function searchLabels($query, $params = [])
-    {
-        $params['type'] = 'label';
-        return $this->search($query, $params);
     }
 
     /**
@@ -195,12 +217,19 @@ class Discogs
      */
     protected function performPost($method, $data, Http\Client $client)
     {
-        if (is_string($data)) {
-            $client->setRawData($data);
-        } elseif (is_array($data) || is_object($data)) {
-            $client->setParameterPost((array) $data);
-        }
+        if (is_array($data) || is_object($data))
+            $data = json_encode($data);
         $client->setMethod($method);
+        $client->setHeaders(Http\Headers::fromString('Content-Type: application/json'));
+        $client->setRawBody($data);
+        return $client->send();
+    }
+
+    protected function delete($path) {
+        $client = $this->getHttpClient();
+        $this->prepare($path, $client);
+        $client->setMethod(Http\Request::METHOD_DELETE);
+        $client->setHeaders(Http\Headers::fromString('Content-Type: application/json'));
         return $client->send();
     }
 
@@ -221,7 +250,7 @@ class Discogs
     ) {
         if ($httpMethod === null)
             // Default to GET (since Discogs complains over missing length in our POST requests)
-            $httpMethod = OAuth\OAuth::GET;
+        $httpMethod = OAuth\OAuth::GET;
         return $this->oauthConsumer->getRequestToken($customServiceParameters, $httpMethod, $request);
     }
 
