@@ -1,6 +1,6 @@
 # ZendService\Discogs component
 
-Provides access to the Discogs v2.0 APIs, including
+PHP wrapper for the Discogs v2.0 API, heavily based on the ZendService\Twitter component. Provides access to the following parts of the Discogs API:
 
 - Database
   - Artist
@@ -25,7 +25,7 @@ Marketplace and User parts of the API is supported with OAuth authentication.
 
 ## Status
 
-In development - not production ready.
+Works, but has some missing parts and rough edges.
 
 ## Running tests
 - install dependencies using `composer install`
