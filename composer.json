@@ -25,7 +25,6 @@
         "zendframework/zend-stdlib": ">=2.0.0",
         "zendframework/zend-uri": ">=2.0.0",
         "zendframework/zendoauth": ">=2.0.0",
-        "phpunit/phpunit": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*",
