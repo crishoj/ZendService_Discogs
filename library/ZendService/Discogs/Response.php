@@ -92,7 +92,9 @@ class Response
     public function getError()
     {
         if ($this->isError())
-            return $this->httpResponse->getReasonPhrase();
+            return ($this->jsonBody && !empty($this->jsonBody->message))
+                ? $this->jsonBody->message
+                : $this->httpResponse->getReasonPhrase();
     }
 
     /**
